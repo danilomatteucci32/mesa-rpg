@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#060507">
+<meta name="description" content="Mesa de RPG online pelo celular: cenas, dados, fichas, voz e chat.">
+<title>Mesa RPG</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- ============ HOME ============ -->
+<section id="home" class="screen">
+  <div class="brand">
+    <div class="sigil">⚔</div>
+    <h1>Mesa RPG</h1>
+    <p class="sub">Sua mesa de aventura, no celular de todos</p>
+  </div>
+
+  <button id="installBtn" class="btn ghost big hidden" type="button">📲 Instalar o app no celular</button>
+
+  <div id="invite" class="card invite hidden">
+    <div class="small">Você foi convidado para</div>
+    <h2 id="invMesa">Mesa</h2>
+    <div class="small" id="invMestre"></div>
+  </div>
+
+  <div id="recent" class="card hidden">
+    <h2>Continuar</h2>
+    <div id="recentList"></div>
+  </div>
+
+  <form id="joinForm" class="card">
+    <h2 id="joinTitle">Entrar como jogador</h2>
+    <label id="joinCodeLabel">Código da mesa<input id="joinCode" maxlength="5" autocomplete="off" autocapitalize="characters" placeholder="Ex.: K7QXP" required></label>
+    <label>Seu nome<input id="joinName" maxlength="40" placeholder="Como te chamam?" required></label>
+    <button class="btn primary big" type="submit">Entrar na mesa</button>
+  </form>
+
+  <button id="showCreate" class="btn ghost big hidden" type="button">👑 Quero criar a minha própria mesa</button>
+  <form id="createForm" class="card">
+    <h2>Sou o mestre</h2>
+    <label>Seu nome<input id="mName" maxlength="40" placeholder="Nome do mestre" required></label>
+    <label>Nome da mesa<input id="mMesa" maxlength="60" placeholder="Ex.: As Crônicas de Alvorada"></label>
+    <button class="btn gold big" type="submit">Criar mesa</button>
+    <p class="note">Cada mesa tem um único mestre (quem cria) e quantos jogadores ele quiser.</p>
+  </form>
+</section>
+
+<!-- ============ APP ============ -->
+<section id="app" class="screen hidden">
+  <header class="topbar">
+    <div class="tb-left">
+      <div id="mesaNome" class="mesa-nome">Mesa</div>
+      <div class="tb-meta"><span id="roleBadge" class="badge">Jogador</span> <button id="codeBtn" class="code-chip" title="Convidar">#<span id="mesaCode">-----</span></button></div>
+    </div>
+    <div class="tb-right">
+      <button id="modeBtn" class="mode-chip on" title="Modo de fala">🎭 ON</button>
+      <span id="connDot" class="dot off" title="Conexão"></span>
+      <button id="leaveBtn" class="icon-btn" title="Sair">⎋</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- CENA -->
+    <div class="tab" id="tab-cena">
+      <div class="scene">
+        <div id="sceneImgWrap" class="scene-img"><img id="sceneImg" alt=""><div class="scene-ph">🜂</div><div id="zoomMark" class="zoom-mark hidden"></div></div>
+        <div class="scene-text">
+          <h2 id="sceneTitle"></h2>
+          <p id="sceneDesc"></p>
+        </div>
+      </div>
+      <div id="detailCard" class="detail hidden">
+        <div class="detail-head">🔍 Detalhe</div>
+        <div id="detailImg" class="detail-img"></div>
+        <p id="detailText"></p>
+      </div>
+      <div class="mestre-only row gap">
+        <button id="editSceneBtn" class="btn gold big grow">🖼 Mudar cena</button>
+        <button id="detailBtn" class="btn ghost big grow">🔍 Detalhe</button>
+      </div>
+      <button id="clearDetailBtn" class="btn ghost mestre-only hidden" style="width:100%;margin-top:8px">Esconder detalhe</button>
+
+      <h3 class="section">Narração do mestre</h3>
+      <div id="narrFeed" class="feed"></div>
+
+      <div class="mestre-only card composer">
+        <div class="seg" id="modeSeg">
+          <button type="button" data-mode="on" class="active">🎭 ON · personagem</button>
+          <button type="button" data-mode="off">💬 OFF · fora de cena</button>
+        </div>
+        <label id="persLabel">Falando como (opcional)<input id="sayPers" maxlength="60" placeholder="Ex.: Taverneiro Borin"></label>
+        <label id="toLabel" class="hidden">Para<select id="sayTo"></select></label>
+        <textarea id="sayText" rows="3" placeholder="Narre a cena..."></textarea>
+        <button id="sayBtn" class="btn primary big">Enviar</button>
+      </div>
+    </div>
+
+    <!-- DADOS -->
+    <div class="tab hidden" id="tab-dados">
+      <div id="lastRoll" class="last-roll empty"><div class="lr-hint">Escolha os dados e role!</div></div>
+      <div class="card">
+        <h3>Dados da rolagem</h3>
+        <div id="diceGrid" class="dice-grid"></div>
+        <div class="row">
+          <label class="grow">Modificador
+            <div class="stepper"><button type="button" data-mod="-1">−</button><input id="mod" type="number" value="0" inputmode="numeric"><button type="button" data-mod="1">+</button></div>
+          </label>
+        </div>
+        <label>Motivo (opcional)<input id="rollLabel" maxlength="80" placeholder="Ex.: Ataque com espada"></label>
+        <label class="mestre-only">Rolagem para<select id="rollTarget"><option value="">Mesa toda</option></select></label>
+        <div id="exprPreview" class="expr">Nenhum dado escolhido</div>
+        <div class="row gap">
+          <button id="clearDice" class="btn ghost" type="button">Limpar</button>
+          <button id="rollBtn" class="btn gold big grow" type="button">🎲 Rolar</button>
+        </div>
+      </div>
+      <h3 class="section">Histórico</h3>
+      <div id="rollHist" class="feed"></div>
+    </div>
+
+    <!-- FICHAS -->
+    <div class="tab hidden" id="tab-fichas">
+      <div id="sheetList" class="mestre-only"></div>
+      <div id="sheetEditor"></div>
+    </div>
+
+    <!-- CHAT -->
+    <div class="tab hidden" id="tab-chat">
+      <div id="convChips" class="chips"></div>
+      <p class="note" id="chatNote"></p>
+      <div id="chatFeed" class="feed chat"></div>
+      <form id="chatForm" class="chat-form player-only">
+        <button type="button" id="chatMode" class="mode-chip on small-chip">🎭</button>
+        <input id="chatText" maxlength="1000" placeholder="Mensagem para o grupo..." autocomplete="off">
+        <button class="btn primary" type="submit">➤</button>
+      </form>
+    </div>
+
+    <!-- MESA -->
+    <div class="tab hidden" id="tab-mesa">
+      <div class="card center mestre-only">
+        <div class="small">Código da mesa</div>
+        <div id="bigCode" class="big-code">-----</div>
+        <button id="shareBtn" class="btn gold big">📨 Convidar jogadores</button>
+        <div class="row gap share-row">
+          <a id="waBtn" class="btn wa grow" target="_blank" rel="noopener">WhatsApp</a>
+          <a id="mailBtn" class="btn ghost grow">E-mail</a>
+          <button id="copyBtn" class="btn ghost grow" type="button">Copiar link</button>
+        </div>
+        <div id="inviteUrl" class="small invite-url"></div>
+      </div>
+      <h3 class="section">Na mesa</h3>
+      <div id="playerList" class="plist"></div>
+      <div class="card player-only">
+        <h3>Mensagens privadas do mestre</h3>
+        <div id="privFeed" class="feed"></div>
+      </div>
+      <div class="card mestre-only">
+        <h3>Mensagens OFF enviadas</h3>
+        <div id="privFeedM" class="feed"></div>
+      </div>
+    </div>
+
+    <!-- REGISTRO DO MESTRE -->
+    <div class="tab hidden" id="tab-registro">
+      <div class="reg-head">
+        <h2>📖 Registro do Mestre</h2>
+        <button id="exportLog" class="btn ghost" type="button">⬇ Exportar</button>
+      </div>
+      <p class="note">Só você vê. Tudo o que acontece na mesa: falas transcritas (ON/OFF), chat, mensagens diretas, dados e cenas.</p>
+      <div id="logChips" class="chips"></div>
+      <div id="logFeed" class="feed"></div>
+    </div>
+  </main>
+
+  <!-- barra de voz -->
+  <div id="voiceBar" class="voicebar">
+    <div class="vb-row">
+      <button id="voiceJoin" class="btn primary vb-join" type="button">🎙 Entrar na voz</button>
+      <button id="muteBtn" class="vb-btn hidden" type="button" title="Microfone">🎙</button>
+      <div id="voicePeers" class="vpeers"></div>
+      <button id="pttBtn" class="vb-btn hidden" type="button" title="Segure para ditar">✍️</button>
+      <button id="voiceLeave" class="vb-btn danger hidden" type="button" title="Sair da voz">✕</button>
+    </div>
+    <div id="sttLine" class="stt-line hidden"></div>
+  </div>
+  <div id="remoteAudio" class="hidden"></div>
+
+  <nav class="bottom">
+    <button data-tab="cena" class="active"><span>🏰</span>Cena<i class="bdg"></i></button>
+    <button data-tab="dados"><span>🎲</span>Dados<i class="bdg"></i></button>
+    <button data-tab="fichas"><span>📜</span>Fichas<i class="bdg"></i></button>
+    <button data-tab="chat"><span>💬</span>Chat<i class="bdg"></i></button>
+    <button data-tab="mesa"><span>👥</span>Mesa<i class="bdg"></i></button>
+    <button data-tab="registro" class="mestre-only"><span>📖</span>Registro<i class="bdg"></i></button>
+  </nav>
+</section>
+
+<!-- Modal: editar cena -->
+<div id="sceneModal" class="modal hidden">
+  <div class="sheet-panel">
+    <div class="panel-head"><h2>Mudar cena</h2><button class="icon-btn" data-close>✕</button></div>
+    <label>Título<input id="scTitle" maxlength="120"></label>
+    <label>Descrição<textarea id="scDesc" rows="4" maxlength="3000" placeholder="Vocês estão diante de uma porta antiga..."></textarea></label>
+    <div class="img-pick">
+      <div id="scPreview" class="sc-preview"><span>Sem imagem</span></div>
+      <div class="row gap">
+        <label class="btn ghost grow file-btn">📷 Galeria / câmera<input id="scFile" type="file" accept="image/*" hidden></label>
+        <button id="scNoImg" type="button" class="btn ghost">Sem imagem</button>
+      </div>
+      <label>ou cole o link de uma imagem<input id="scUrl" type="url" placeholder="https://..."></label>
+      <div id="gallery" class="gallery"></div>
+    </div>
+    <button id="scSave" class="btn gold big">Mostrar para todos</button>
+  </div>
+</div>
+
+<!-- Modal: detalhe -->
+<div id="detailModal" class="modal hidden">
+  <div class="sheet-panel">
+    <div class="panel-head"><h2>Mostrar detalhe</h2><button class="icon-btn" data-close>✕</button></div>
+    <div class="seg" id="detSeg">
+      <button type="button" data-k="zoom" class="active">🔍 Zoom na imagem</button>
+      <button type="button" data-k="foto">📷 Outra foto</button>
+    </div>
+    <div id="detZoom">
+      <p class="note">Toque na imagem onde está o detalhe (ex.: o símbolo em cima da porta).</p>
+      <div id="detPick" class="det-pick"><img id="detPickImg" alt=""><div id="detPickMark" class="zoom-mark"></div></div>
+      <label>Aproximação: <b id="detZoomVal">3×</b><input id="detZoomRange" type="range" min="1.5" max="8" step="0.5" value="3"></label>
+      <div id="detZoomPrev" class="detail-img"></div>
+    </div>
+    <div id="detFoto" class="hidden">
+      <div id="detFotoPrev" class="sc-preview"><span>Sem foto</span></div>
+      <label class="btn ghost file-btn" style="width:100%">📷 Escolher da galeria<input id="detFile" type="file" accept="image/*" hidden></label>
+      <label>ou link da imagem<input id="detUrl" type="url" placeholder="https://..."></label>
+    </div>
+    <label>Texto do detalhe<textarea id="detText" rows="3" maxlength="1000" placeholder="Acima da porta há um símbolo de serpente gravado..."></textarea></label>
+    <button id="detSave" class="btn gold big">Mostrar para todos</button>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<div id="rollFx" class="roll-fx hidden"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

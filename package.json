@@ -1,0 +1,25 @@
+{
+  "name": "mesa-rpg",
+  "version": "1.0.0",
+  "description": "Mesa de RPG online pelo celular (mestre, cenas, dados, fichas, voz, chat)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^5.3.0",
+    "socket.io": "^4.8.4"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "private": true,
+  "devDependencies": {
+    "socket.io-client": "^4.8.4"
+  }
+}
